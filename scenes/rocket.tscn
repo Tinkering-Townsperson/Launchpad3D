@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://bfvykhb4meixw"]
+
+[ext_resource type="Script" uid="uid://ifj7mtucw716" path="res://scenes/rocket.gd" id="1_3341w"]
+[ext_resource type="Material" uid="uid://bopn1rms21f7c" path="res://resources/red_material_3d.tres" id="2_dkv7l"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_3341w"]
+radius = 0.4
+height = 0.8
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_sgp6g"]
+top_radius = 0.4
+bottom_radius = 0.4
+height = 3.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sgp6g"]
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="PrismMesh" id="PrismMesh_3341w"]
+left_to_right = 0.0
+size = Vector3(1, 2, 0.1)
+
+[node name="Rocket" type="Node3D" unique_id=524264503]
+script = ExtResource("1_3341w")
+
+[node name="RocketPivot" type="Node3D" parent="." unique_id=970977678]
+
+[node name="RocketTip" type="MeshInstance3D" parent="RocketPivot" unique_id=736900194]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9992917, 0)
+mesh = SubResource("SphereMesh_3341w")
+skeleton = NodePath("../RocketBody")
+surface_material_override/0 = ExtResource("2_dkv7l")
+
+[node name="RocketBody" type="MeshInstance3D" parent="RocketPivot" unique_id=1901265485]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+mesh = SubResource("CylinderMesh_sgp6g")
+skeleton = NodePath("../../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_sgp6g")
+
+[node name="RocketFin1" type="MeshInstance3D" parent="RocketPivot" unique_id=1203355759]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 1, 0)
+mesh = SubResource("PrismMesh_3341w")
+surface_material_override/0 = ExtResource("2_dkv7l")
+
+[node name="RocketFin2" type="MeshInstance3D" parent="RocketPivot" unique_id=1914323722]
+transform = Transform3D(-0.5, 0, 0.8660253, 0, 1, 0, -0.8660253, 0, -0.5, -0.51378936, 1, -0.7094548)
+mesh = SubResource("PrismMesh_3341w")
+surface_material_override/0 = ExtResource("2_dkv7l")
+
+[node name="RocketFin3" type="MeshInstance3D" parent="RocketPivot" unique_id=848583134]
+transform = Transform3D(-0.5, 0, -0.8660253, 0, 1, 0, 0.8660253, 0, -0.5, -0.514, 1, 0.7)
+mesh = SubResource("PrismMesh_3341w")
+surface_material_override/0 = ExtResource("2_dkv7l")

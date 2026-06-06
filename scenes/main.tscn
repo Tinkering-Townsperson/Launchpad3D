@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bpsl1ya6cs0qt"]
+
+[ext_resource type="PackedScene" uid="uid://bfvykhb4meixw" path="res://scenes/rocket.tscn" id="1_o5qli"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_sgp6g"]
+
+[node name="Main" type="Node3D" unique_id=1576420411]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1133639828]
+transform = Transform3D(0.99278873, -0.050048903, 0.10892928, 0, 0.90867585, 0.41750234, -0.119876936, -0.41449162, 0.90212315, 9.485861, 10.144167, 13.926973)
+
+[node name="Rocket" parent="." unique_id=524264503 instance=ExtResource("1_o5qli")]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=265428269]
+transform = Transform3D(1, 0, 0, 0, 0.9745191, 0.22430477, 0, -0.22430477, 0.9745191, 0, 2.6206684, 4.5382576)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1944513706]
+transform = Transform3D(10, 0, 0, 0, 0.2, 0, 0, 0, 10, 0, -0.0995766, 0)
+mesh = SubResource("BoxMesh_sgp6g")
