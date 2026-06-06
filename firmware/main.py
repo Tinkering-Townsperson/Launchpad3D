@@ -12,6 +12,11 @@ def on_button_pressed_a():
 input.on_button_pressed(Button.A, on_button_pressed_a)
 
 
+def on_button_pressed_ab():
+    datalogger.delete_log()
+    basic.show_icon(IconNames.CHESSBOARD)
+input.on_button_pressed(Button.AB, on_button_pressed_ab)
+
 def on_every_interval():
     if not logging:
         return
