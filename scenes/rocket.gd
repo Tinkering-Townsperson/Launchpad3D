@@ -1,71 +1,127 @@
 extends Node3D
 
-# Configuration matching your hardware loop interval (500ms = 0.5 seconds)
-const TIME_STEP : float = 0.5 
+# Configuration constants 
+const GRAVITY_BASELINE: float = 1000.0  # Total magnitude baseline at rest (milli-g's)
+const LAUNCH_THRESHOLD: float = 250.0   # Deviation from 1G required to launch flight
+const FLIGHT_SPEED: float = 15.0        # Vertical speed tracking scalar
 
-# Interpolation weight (higher = faster snapping, lower = smoother/slower glide)
-# 5.0 to 10.0 is usually the sweet spot for low-frequency data tracking
-const SMOOTHING_SPEED : float = 6.0 
+# Tuning parameters for physics and tilt reactivity
+const TILT_SENSITIVITY: float = 0.05    # Controls rocket tilt angles
+const VELOCITY_SMOOTHING: float = 0.15  # Smooths out raw step-changes in speed vectors
+const ROTATION_SMOOTHING: float = 0.10  # NEW: Controls tilt sluggishness (Lower = smoother/heavier, Higher = snappier)
 
-var current_index : int = 0
-var playback_timer : float = 0.0
+enum RocketState { IDLE, LAUNCHING, FALLING }
 
-# Our container's target orientation matrix we want to slide toward
-var target_transform : Transform3D
+var current_state: int = RocketState.IDLE
+var telemetry_data: Array[Dictionary] = []
+var current_row_index: int = 0
 
-# Hardcoded test data array to simulate physical movement vectors on Day 1
-var mock_vectors : Array = [
-	Vector3(0, 0, -1023),    # 1. Standing perfectly vertical at rest
-	Vector3(0, 0, -1023),    # 2. Still stationary on the pad
-	Vector3(120, -80, 3200),  # 3. Sudden violent forward blast-off spike!
-	Vector3(500, -400, 1500), # 4. Upward ascent coasting
-	Vector3(1023, -900, -100),# 5. Heavy aerodynamic banking bank/tilt
-	Vector3(50, -100, -1023), # 6. Tipping upside down at apogee (peak)
-	Vector3(-1023, 1023, -4096), # 7. Sudden crash impact spike!
-	Vector3(950, 380, -100)   # 8. Resting horizontally tilted in the grass
-]
+var playback_timer: float = 0.0
+var time_between_samples: float = 0.1 
+
+# Processing vectors
+var target_velocity: Vector3 = Vector3.ZERO
+var current_velocity: Vector3 = Vector3.ZERO
+var target_rotation: Vector3 = Vector3.ZERO # Track target Euler angles globally
+
+# Node references
+@onready var rocket_pivot: Node3D = $RocketPivot
 
 func _ready() -> void:
-	# Initialize our target transform to match our starting position
-	target_transform = global_transform
+	telemetry_data = TelemetryParser.parse_telemetry_file("res://testing/mock_flight.csv")
+	if telemetry_data.is_empty():
+		set_physics_process(false)
+		push_error("Rocket Error: No telemetry data found.")
+		return
+		
+	if not has_node("RocketPivot"):
+		push_error("Rocket Error: Child node 'RocketPivot' missing!")
 
 func _physics_process(delta: float) -> void:
+	# CRITICAL PLAYBACK SAFETY BLOCK
+	if current_row_index >= telemetry_data.size():
+		print("Telemetry playback finished! Forcing final touchdown.")
+		transition_to_state(RocketState.IDLE)
+		target_velocity = Vector3.ZERO
+		current_velocity = Vector3.ZERO
+		target_rotation = Vector3.ZERO
+		position.y = 0.0 
+		
+		# Settle upright instantly upon shutdown
+		rocket_pivot.basis = Basis.from_euler(Vector3.ZERO)
+		set_physics_process(false)
+		return
+
 	playback_timer += delta
-	
-	# Every 0.5 seconds, update our target vector destination
-	if playback_timer >= TIME_STEP:
+	if playback_timer >= time_between_samples:
 		playback_timer = 0.0
-		current_index += 1
+		process_telemetry_snapshot(telemetry_data[current_row_index])
+		current_row_index += 1
 		
-		if current_index >= mock_vectors.size():
-			current_index = 0
-			print("--- Loop Restarted ---")
+	# 1. POSITION TRACKING: Smoothly blend and apply current velocity translations 
+	current_velocity = current_velocity.lerp(target_velocity, VELOCITY_SMOOTHING)
+	position += current_velocity * delta
+	
+	# 2. NEW: CONTINUOUS ROTATION SMOOTHING (Slerp Filter)
+	# Convert our target Euler rotation vector into an orientation Basis matrix
+	var target_basis: Basis = Basis.from_euler(target_rotation)
+	# Spherical interpolation prevents sudden shaking or snapping when raw sensor values spike
+	rocket_pivot.basis = rocket_pivot.basis.slerp(target_basis, ROTATION_SMOOTHING)
+	
+	# GLOBAL SAFETY RAIL: Keep the rocket locked above ground level on ALL frames
+	if position.y < 0.0:
+		position.y = 0.0
+		if current_state == RocketState.FALLING:
+			transition_to_state(RocketState.IDLE)
+
+func process_telemetry_snapshot(snapshot: Dictionary) -> void:
+	var total_acc: float = snapshot["total_acc"]
+	var pure_motion: float = total_acc - GRAVITY_BASELINE
+	
+	var ax: float = snapshot["acc_x"]
+	var az: float = snapshot["acc_z"]
+
+	# 1. CYCLICAL STATE MACHINE 
+	if current_state == RocketState.IDLE:
+		if abs(pure_motion) > LAUNCH_THRESHOLD:
+			transition_to_state(RocketState.LAUNCHING)
 			
-		var active_vector = mock_vectors[current_index]
-		calculate_target_orientation(active_vector)
+	elif current_state == RocketState.LAUNCHING:
+		if pure_motion < -200.0: 
+			transition_to_state(RocketState.FALLING)
+			
+	elif current_state == RocketState.FALLING:
+		if abs(pure_motion) < 180.0 or current_row_index >= telemetry_data.size() - 3:
+			transition_to_state(RocketState.IDLE)
 
-	# --- THE SMOOTHING ENGINE ---
-	# Instead of snapping, we use 'interpolate_with' (Godot's 3D matrix slerp wrapper).
-	# This smoothly blends the current orientation into the target orientation frame by frame.
-	global_transform = global_transform.interpolate_with(target_transform, SMOOTHING_SPEED * delta)
-
-# Calculates what the orientation matrix SHOULD be based on the sensor vector
-func calculate_target_orientation(sensor_force: Vector3) -> void:
-	if sensor_force.length() < 0.1:
-		sensor_force = Vector3(0, 0, -1)
+	# 2. VECTOR ORIENTATION & DIRECTIONAL VELOCITY CALCULATIONS
+	if current_state != RocketState.IDLE:
+		var pitch_deg: float = clamp(az * TILT_SENSITIVITY, -45.0, 45.0)
+		var roll_deg: float = clamp(-ax * TILT_SENSITIVITY, -45.0, 45.0)
 		
-	var target_direction = sensor_force.normalized()
-	
-	# Store our current transform state so we can alter its basis rotation safely
-	var temp_transform = global_transform
-	
-	# Use an absolute up-vector guard to prevent look_at math errors
-	if abs(target_direction.dot(Vector3.UP)) < 0.99:
-		temp_transform = temp_transform.looking_at(global_position + target_direction, Vector3.UP)
+		# Set the target rotation vector; _physics_process will smoothly interpolate towards this
+		target_rotation = Vector3(deg_to_rad(pitch_deg), 0.0, deg_to_rad(roll_deg))
+		
+		# Trigonometric Projection: Map pitch/roll degrees to horizontal offsets
+		var move_x: float = sin(deg_to_rad(roll_deg)) * FLIGHT_SPEED
+		var move_z: float = sin(deg_to_rad(pitch_deg)) * FLIGHT_SPEED
+		
+		if current_state == RocketState.LAUNCHING:
+			target_velocity = Vector3(move_x, FLIGHT_SPEED, move_z)
+		elif current_state == RocketState.FALLING:
+			target_velocity = Vector3(move_x * 0.5, -FLIGHT_SPEED * 0.4, move_z * 0.5)
+			
 	else:
-		temp_transform = temp_transform.looking_at(global_position + target_direction, Vector3.FORWARD)
-		
-	# Assign the newly calculated rotational matrix to our target destination
-	target_transform = temp_transform
+		# Settle upright and completely zero out target forces
+		target_rotation = Vector3.ZERO
+		target_velocity = Vector3.ZERO
 
-	print("Snapshot #", current_index, " | Data Updated | Vector: ", sensor_force)
+## Centralized state messaging helper to keep your console logging clean
+func transition_to_state(new_state: int) -> void:
+	if current_state == new_state:
+		return
+	current_state = new_state
+	match current_state:
+		RocketState.LAUNCHING: print("🚀 State: LAUNCHING")
+		RocketState.FALLING:   print("🪂 State: FALLING")
+		RocketState.IDLE:      print("🏡 State: IDLE (Touchdown)")

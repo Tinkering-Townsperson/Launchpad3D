@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bpsl1ya6cs0qt"]
 
 [ext_resource type="PackedScene" uid="uid://bfvykhb4meixw" path="res://scenes/rocket.tscn" id="1_o5qli"]
+[ext_resource type="Script" uid="uid://c443fm7coaa4e" path="res://scenes/camera_3d.gd" id="2_0wfyh"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_sgp6g"]
 
@@ -11,8 +12,10 @@ transform = Transform3D(0.99278873, -0.050048903, 0.10892928, 0, 0.90867585, 0.4
 
 [node name="Rocket" parent="." unique_id=524264503 instance=ExtResource("1_o5qli")]
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=265428269]
-transform = Transform3D(1, 0, 0, 0, 0.9745191, 0.22430477, 0, -0.22430477, 0.9745191, 0, 2.6206684, 4.5382576)
+[node name="Camera3D" type="Camera3D" parent="." unique_id=265428269 node_paths=PackedStringArray("target_node")]
+transform = Transform3D(1, 0, 0, 0, 0.935746, 0.3526747, 0, -0.3526747, 0.935746, 0, 12.865925, 18.383099)
+script = ExtResource("2_0wfyh")
+target_node = NodePath("../Rocket")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1944513706]
 transform = Transform3D(10, 0, 0, 0, 0.2, 0, 0, 0, 10, 0, -0.0995766, 0)

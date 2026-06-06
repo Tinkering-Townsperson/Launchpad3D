@@ -28,7 +28,7 @@ def on_every_interval():
         datalogger.create_cv("sound", input.sound_level()),
         datalogger.create_cv("temp", input.temperature())
     )
-loops.every_interval(500, on_every_interval)
+loops.every_interval(50, on_every_interval)
 
 def on_log_full():
     basic.show_icon(IconNames.SKULL)
