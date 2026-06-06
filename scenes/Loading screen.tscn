@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://bg64yfs1k7bl7"]
 
-[ext_resource type="Texture2D" uid="uid://b6tu3xa8a4tb0" path="res://Stary background.png" id="1_vaego"]
-[ext_resource type="PackedScene" uid="uid://8fw7bkbe0wdc" path="res://Rocket animation.tscn" id="2_8bxou"]
-[ext_resource type="FontFile" uid="uid://b4eyvec4ilc0n" path="res://Bubblegum.ttf" id="3_v5jlg"]
-[ext_resource type="FontFile" uid="uid://yr14h4qbgb7c" path="res://GrimeSlime-Regular.ttf" id="4_sxbu3"]
+[ext_resource type="Texture2D" uid="uid://b6tu3xa8a4tb0" path="res://assets/images/Stary background.png" id="1_vaego"]
+[ext_resource type="PackedScene" uid="uid://8fw7bkbe0wdc" path="res://scenes/Rocket animation.tscn" id="2_8bxou"]
+[ext_resource type="FontFile" uid="uid://b4eyvec4ilc0n" path="res://assets/fonts/Bubblegum.ttf" id="3_v5jlg"]
+[ext_resource type="FontFile" uid="uid://yr14h4qbgb7c" path="res://assets/fonts/GrimeSlime-Regular.ttf" id="4_sxbu3"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8bxou"]
 atlas = ExtResource("1_vaego")

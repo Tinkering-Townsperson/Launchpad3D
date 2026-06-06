@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://yr14h4qbgb7c"
-path="res://.godot/imported/GrimeSlime-Regular.ttf-408df89f164278be7d690766e04e6474.fontdata"
+uid="uid://b4eyvec4ilc0n"
+path="res://.godot/imported/Bubblegum.ttf-e16b8fb352293be45fd882ed36ddca75.fontdata"
 
 [deps]
 
-source_file="res://GrimeSlime-Regular.ttf"
-dest_files=["res://.godot/imported/GrimeSlime-Regular.ttf-408df89f164278be7d690766e04e6474.fontdata"]
+source_file="res://assets/fonts/Bubblegum.ttf"
+dest_files=["res://.godot/imported/Bubblegum.ttf-e16b8fb352293be45fd882ed36ddca75.fontdata"]
 
 [params]
 
