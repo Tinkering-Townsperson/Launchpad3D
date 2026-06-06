@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://bg64yfs1k7bl7"]
 
+[ext_resource type="Script" uid="uid://dse0r570veb0s" path="res://scenes/loading_screen.gd" id="1_57o5k"]
 [ext_resource type="Texture2D" uid="uid://b6tu3xa8a4tb0" path="res://assets/images/Stary background.png" id="1_vaego"]
 [ext_resource type="PackedScene" uid="uid://8fw7bkbe0wdc" path="res://scenes/Rocket animation.tscn" id="2_8bxou"]
 [ext_resource type="FontFile" uid="uid://b4eyvec4ilc0n" path="res://assets/fonts/Bubblegum.ttf" id="3_v5jlg"]
@@ -237,7 +238,24 @@ animations = [{
 "speed": 19.0
 }]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vx1c1"]
+bg_color = Color(0.6, 0.6, 0.6, 0.30588236)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.8, 0, 0.8, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vkfgu"]
+bg_color = Color(0, 0.6, 0.6, 0.3019608)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.8, 0, 0.8, 1)
+
 [node name="Node2D" type="Node2D" unique_id=1436144691]
+script = ExtResource("1_57o5k")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1860371821]
 modulate = Color(0.25882354, 0.63529414, 0.63529414, 1)
@@ -273,3 +291,29 @@ theme_override_font_sizes/font_size = 40
 text = "Get ready to.."
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1363815805]
+
+[node name="Button" type="Button" parent="." unique_id=1769040206]
+offset_left = 278.0
+offset_top = 202.0
+offset_right = 806.0
+offset_bottom = 366.0
+theme_override_colors/font_color = Color(0, 0.8745098, 0.8745098, 1)
+theme_override_colors/font_focus_color = Color(0, 0.9490196, 0.9490196, 1)
+theme_override_colors/font_pressed_color = Color(0, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0, 0.9490196, 0.9490196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0, 0.8745098, 0.8745098, 0.5019608)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/icon_normal_color = Color(0, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(0, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(0, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(0, 1, 1, 1)
+theme_override_colors/icon_hover_pressed_color = Color(0, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(0, 1, 1, 0.4)
+theme_override_fonts/font = ExtResource("4_sxbu3")
+theme_override_font_sizes/font_size = 70
+theme_override_styles/normal = SubResource("StyleBoxFlat_vx1c1")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_vkfgu")
+text = "LETS GO!"
+
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
